@@ -11,11 +11,11 @@ import java.time.LocalDate
 fun main() {
     val dayWiseData: List<DayWiseData> = CSVUtil().readDatasetByDayWise()
     val countryWiseData: List<CountryWiseData> = CSVUtil().readDatasetByCountryWise()
-    val fullGroupData: List<FullGroupData> = CSVUtil().readFullGroupedDataset();
+    val fullGroupData: List<FullGroupData> = CSVUtil().readFullGroupedDataset()
     val locationData = CSVUtil().readCountriesLocationDataset()
 
     printDayWiseDatasetLimitLineByGivenNumberOr5(dayWiseData)
-    printDatesWhenDeathIsLessThan50(dayWiseData)
+    printDatesAndDeathsInRangeOfGivenDeathCountSortedByDeath(50, 200, dayWiseData)
     printCountryAndLocationWhoseWHORegionIsSameLikeSelectedCountry(countryWiseData, locationData)
     printConfirmedCasesWithCountryByDateRange(fullGroupData)
     printConfirmedCasesAndNewCases(fullGroupData)
@@ -32,11 +32,19 @@ fun printDayWiseDatasetLimitLineByGivenNumberOr5(dayWiseData: List<DayWiseData>,
     }
 }
 
-fun printDatesWhenDeathIsLessThan50(datasetDayWise: List<DayWiseData>) {
-    val datesWhenDeathIsLessThan50 =
-        MainLogicImpl().getDatesOfDeathsWhenDeathIsLessThanGivenNumberSortedByDeath(50, datasetDayWise)
+fun printDatesAndDeathsInRangeOfGivenDeathCountSortedByDeath(
+    fromDeathCount: Int,
+    toDeathCount: Int,
+    datasetDayWise: List<DayWiseData>
+) {
+    val datesAndDeath =
+        MainLogicImpl().getDatesAndDeathsInRangeOfGivenDeathCountSortedByDeath(
+            fromDeathCount,
+            toDeathCount,
+            datasetDayWise
+        )
     println("\ndates When Death Is More Than 50:(Sorted by death)")
-    datesWhenDeathIsLessThan50.forEach { print("$it, ") }
+    datesAndDeath.forEach { print("$it, ") }
 }
 
 fun printCountryAndLocationWhoseWHORegionIsSameLikeSelectedCountry(

@@ -15,10 +15,10 @@ Date 		 Confirmed
 2020-01-26 	 2118
 ```
 
-printDatesWhenDeathIsLessThan50(dayWiseData)
+printDatesAndDeathsInRangeOfGivenDeathCountSortedByDeath(50, 200, dayWiseData)
 ```
 dates When Death Is More Than 50:(Sorted by death)
-2020-01-22=17, 2020-01-23=18, 2020-01-24=26, 2020-01-25=42, 
+2020-01-26=56, 2020-01-27=82, 2020-01-28=131, 2020-01-29=133, 2020-01-30=171, 
 ```
 
 printCountryAndLocationWhoseWHORegionIsSameLikeSelectedCountry(countryWiseData, locationData)

@@ -11,13 +11,17 @@ import kotlin.collections.HashMap
 
 interface MainLogic {
 
-    fun getDatesOfDeathsWhenDeathIsLessThanGivenNumberSortedByDeath(death: Int, datasetDayWise: List<DayWiseData>): HashMap<LocalDate, Int>
+    fun getDatesAndDeathsInRangeOfGivenDeathCountSortedByDeath(
+        fromDeathCount: Int,
+        toDeathCount: Int,
+        datasetDayWise: List<DayWiseData>
+    ): HashMap<LocalDate, Int>
 
     fun getCountriesLocationWhoseWHORegionIsSameToTheSelectedCountry(
         selectedCountry: String,
         datasetCountryWise: List<CountryWiseData>,
-        datasetCountryLoaction: List<CountryLocationData>
-    ): TreeMap<String, String>
+        datasetCountryLocation: List<CountryLocationData>
+    ): SortedMap<String, String?>
 
     fun getCountriesGotAffectedInRangeOfSelectedDate(from: LocalDate, to: LocalDate)
 

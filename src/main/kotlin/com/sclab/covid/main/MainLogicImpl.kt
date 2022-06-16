@@ -6,61 +6,39 @@ import com.sclab.covid.model.DayWiseData
 import com.sclab.covid.model.FullGroupData
 import com.sclab.covid.resource.Index
 import java.time.LocalDate
-import java.util.TreeMap
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class MainLogicImpl : MainLogic {
 
-    override fun getDatesOfDeathsWhenDeathIsLessThanGivenNumberSortedByDeath(
-        death: Int,
+    override fun getDatesAndDeathsInRangeOfGivenDeathCountSortedByDeath(
+        fromDeathCount: Int,
+        toDeathCount: Int,
         datasetDayWise: List<DayWiseData>
     ): HashMap<LocalDate, Int> {
-        val datesWhenDeathIsMoreThanX: HashMap<LocalDate, Int> = hashMapOf()
-        for (entry in datasetDayWise) {
-            if (entry.deaths < death) {
-                datesWhenDeathIsMoreThanX[entry.date] = entry.deaths
-            }
-        }
+        val dateAndDeath: Map<LocalDate, Int> = datasetDayWise.associateBy({ it.date }, { it.deaths }) // list to map
         val datesWhenDeathIsMoreThanXSortedByDeath =
-            datesWhenDeathIsMoreThanX.toList().sortedBy { (_, value) -> value }.toMap() // sortedByDescending{} for desc
+            dateAndDeath.toList()
+                .filter { (it.second > fromDeathCount) && (it.second < toDeathCount) }
+                .sortedBy { it.second }.toMap()
         return datesWhenDeathIsMoreThanXSortedByDeath as HashMap<LocalDate, Int>
     }
 
     override fun getCountriesLocationWhoseWHORegionIsSameToTheSelectedCountry(
         selectedCountry: String,
         datasetCountryWise: List<CountryWiseData>,
-        datasetCountryLoaction: List<CountryLocationData>
-    ): TreeMap<String, String> {
-        var countries: ArrayList<String> = arrayListOf()
-        var WHORegionOfSelectedCountry = "";
-        for (entry in datasetCountryWise) {
-            if (entry.country == selectedCountry) {
-                WHORegionOfSelectedCountry = entry.whoRegion
-                break
+        datasetCountryLocation: List<CountryLocationData>
+    ): SortedMap<String, String?> {
+        val countries: ArrayList<String> = arrayListOf()
+        val whoRegionOfSelectedCountry = datasetCountryWise.first { it.country == selectedCountry }.whoRegion
+        datasetCountryWise.map {
+            if (it.whoRegion in whoRegionOfSelectedCountry) {
+                countries.add(it.country)
             }
         }
-        for (entry in datasetCountryWise) {
-            if (entry.whoRegion == WHORegionOfSelectedCountry) {
-                countries.add(entry.country)
-            }
-        }
-
-        val allCountryAndLocation: TreeMap<String, String> = TreeMap()
-        val selectedCountryAndLocation: TreeMap<String, String> = TreeMap()
-
-        for (record in datasetCountryLoaction) {
-            if (!allCountryAndLocation.containsKey(record.country)) {
-                allCountryAndLocation[record.country] = record.location
-            }
-        }
-
-        for (country in countries) {
-            val location = allCountryAndLocation[country]
-            if (location != null) {
-                selectedCountryAndLocation[country] = location
-            }
-        }
-
-        return selectedCountryAndLocation
+        val allCountryAndLocation = datasetCountryLocation.associateBy({ it.country }, { it.location }).toSortedMap()
+        return countries.associateBy({ it }, { allCountryAndLocation[it] }).toSortedMap()
     }
 
     override fun getCountriesGotAffectedInRangeOfSelectedDate(from: LocalDate, to: LocalDate) {
@@ -72,16 +50,17 @@ class MainLogicImpl : MainLogic {
         toDate: LocalDate,
         dataset: List<FullGroupData>
     ): TreeMap<LocalDate, HashMap<String, Int>?> {
-        var confirmedCasesWithCountry: TreeMap<LocalDate, HashMap<String, Int>?> = TreeMap()
+        val confirmedCasesWithCountry: TreeMap<LocalDate, HashMap<String, Int>?> = TreeMap()
+
         for (entry in dataset) {
             if (entry.date.isAfter(fromDate) && entry.date.isBefore(toDate) && entry.confirmed > 0) {
                 if (confirmedCasesWithCountry.containsKey(entry.date)) {
-                    var hashMap: HashMap<String, Int>? = confirmedCasesWithCountry[entry.date]
+                    val hashMap: HashMap<String, Int>? = confirmedCasesWithCountry[entry.date]
                     hashMap?.put(entry.country, entry.confirmed)
                     confirmedCasesWithCountry[entry.date] = hashMap
                 } else {
-                    var hashMap = HashMap<String, Int>()
-                    hashMap.put(entry.country, entry.confirmed)
+                    val hashMap = HashMap<String, Int>()
+                    hashMap[entry.country] = entry.confirmed
                     confirmedCasesWithCountry[entry.date] = hashMap
                 }
             }
